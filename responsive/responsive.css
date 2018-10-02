@@ -1,27 +1,39 @@
 @media screen and (min-width: 1201px) {
 	.software {
-		width: 100px;
-		height: 100px;
+		width: 435px;
+		height: 580px;
 		background: url(software.png) 0 0px;
 	}
 }
 
 @media screen and (min-width: 1001px) and (max-width: 1200px) {
 	.software {
-		width: 100px;
-		height: 100px;
-		background: url(software.png) 100 100px;
+		width: 430px;
+		height: 580px;
+		background: url(software.png) -435px 0px;
 	}
 }
 
 @media screen and (min-width: 801px) and (max-width: 1000px) {
-
+	.software {
+		width: 339px;
+		height: 580px;
+		background: url(software.png) -865px 0px;
+	}
 }
 
 @media screen and (min-width: 601px) and (max-width: 800px) {
-
+	.software {
+		width: 715px;
+		height: 631px;
+		background: url(software.png) 0px -580px;
+	}
 }
 
-@media screen and (max-width: 800px) {
-	
+@media screen and (max-width: 600px) {
+	.software {
+		width: 489px;
+		height: 631px;
+		background: url(software.png) -715px -580px;
+	}
 }
