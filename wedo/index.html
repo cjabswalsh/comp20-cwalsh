@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>We Do</title>
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+<h1 id="title">We Do</h1>
+
+<video src="https://www.cs.tufts.edu/comp/20/wedo.mp4" id="wedo" controls></video>
+<div id="lyrics"></div>
+
+<script>
+	// Complete this section and create a CSS file named style.css
+	console.log("HI!");
+	var wedo = document.getElementById("wedo");
+	var caption = document.getElementById("lyrics");
+	console.log("got to here");
+	wedo.addEventListener("timeupdate", function() {
+		if (wedo.currentTime > 4 && wedo.currentTime < 6.5) {
+			lyrics.innerHTML = "<p>Who controls the British crown?</p>";
+		}
+		else if (wedo.currentTime > 6.5 && wedo.currentTime < 9) {
+			lyrics.innerHTML = "<p>And so on...</p>";
+		}
+	}, false);
+
+</script>
+</body>
+</html>	
