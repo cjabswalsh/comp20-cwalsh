@@ -45,15 +45,16 @@ function getClosestStop(map, marker) {
 			closestStopIndex = i;
 		}
 	}
-	var returnContent = '<p>Closest Stop: ' + stations[closestStopIndex][0] + '</p>';
-	returnContent += '<p>Distance: ' + Math.round(smallestDistance) + ' Meters</p>';
+	var returnContent = "<h3>You Are Here!</h3>";
+	returnContent += '<p>Closest Stop: ' + stations[closestStopIndex][0] + '</p>';
+	returnContent += '<p>Distance: ' + Math.round(metersToMiles(smallestDistance) * 100) / 100 + ' Miles</p>';
 	marker.infowindow.setContent(returnContent);
 
 	var coords = [marker.position, stations[closestStopIndex][1]];
 	var redLine2 = new google.maps.Polyline({
         path: coords,
         geodesic: true,
-        strokeColor: '#00FF00',
+        strokeColor: '#0000FF',
         strokeOpacity: 1.0,
         strokeWeight: 2,
         map: map
@@ -95,15 +96,36 @@ function getDataFor(marker) {
 
 	request.onreadystatechange = function() {
 		if (request.readyState == 4 && request.status == 200) {
-			// Step 5: when we get all the JSON data back, parse it and use it
 			theData = request.responseText;
 			stopInfo = JSON.parse(theData);
-			//data = "<p>" + stopInfo.data[1].attributes.departure_time + "</p>";
-			returnHTML = "<ul>";
+
+			var southbound = [];
+			var northbound = [];
 			for (i = 0; i < stopInfo.data.length; i++) {
-				returnHTML += "<li>" + stopInfo.data[i].attributes.departure_time + "</li>";
+				var attributes = stopInfo.data[i].attributes;
+				if (attributes.direction_id == 0) { //Southbound
+					southbound.push(attributes.departure_time);
+				} else { //Northbound
+					northbound.push(attributes.departure_time);
+				}
 			}
-			returnHTML += "</ul>";
+
+			returnHTML = "<h3>Departure Times</h3><table><th>Southbound</th><th>Northbound</th>";
+			for (var i = 0; i < Math.max(southbound.length, northbound.length); i++) {
+				returnHTML += "<tr>";
+				if (southbound[i] != null) {
+					returnHTML += "<td>" + getTime(southbound[i]) + "</td>";
+				} else {
+					returnHTML += "<td></td>";
+				}
+				if (northbound[i] != null) {
+					returnHTML += "<td>" + getTime(northbound[i]) + "</td>";
+				} else {
+					returnHTML += "<td></td>";
+				}
+				returnHTML += "</tr>";
+			}
+			returnHTML += "</table>"
 			marker.infowindow.setContent(returnHTML);
 		}
 		else if (request.readyState == 4 && request.status != 200) {
@@ -116,6 +138,11 @@ function getDataFor(marker) {
 	request.send();
 }
 
+function getTime(dateString) {
+	var date = new Date(dateString);
+	return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+}
+
 function setPolyLine(map) {
 	var coords1 = stations.slice(0, 17).map(x => x[1]);
 	var redLine1 = new google.maps.Polyline({
@@ -123,7 +150,7 @@ function setPolyLine(map) {
         geodesic: true,
         strokeColor: '#FF0000',
         strokeOpacity: 1.0,
-        strokeWeight: 2,
+        strokeWeight: 3,
         map: map
     });
 
@@ -134,9 +161,16 @@ function setPolyLine(map) {
         geodesic: true,
         strokeColor: '#FF0000',
         strokeOpacity: 1.0,
-        strokeWeight: 2,
+        strokeWeight: 3,
         map: map
     });
+}
+
+function metersToMiles(i) {
+     return i*0.000621371192;
+}
+function getMeters(i) {
+     return i*1609.344;
 }
 
 var stations = [
