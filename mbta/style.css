@@ -8,6 +8,14 @@ html, body {
 	padding: 0;
 }
 
+h3 {
+	text-align: center;
+}
+
+table {
+	border-collapse: collapse;
+}
+
 th, td {
-    padding: 15px;
+  padding: 5px;
 }
