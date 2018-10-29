@@ -8,7 +8,12 @@
     <link rel="stylesheet" href="style.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script>
-        // Your work will be done here...
+        $(document).ready(function(){
+            $("#msg").change(function() {
+                var message = this.value;
+                $("#log").html(message);
+            });
+        });
     </script>
 </head>
 
