@@ -9,11 +9,24 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script>
         $(document).ready(function(){
+            if (localStorage["log"] == null) {
+                localStorage["log"] = "";
+            }
+            reload();
             $("#msg").change(function() {
                 var message = this.value;
-                $("#log").html(message);
+                var date = Date();
+                localStorage["log"] = "<p>" + date + " - " + message + "</p>" + localStorage["log"];
+                console.log("adding to log");
+                reload();
             });
         });
+
+        function reload() {
+            output = localStorage["log"];
+            console.log(localStorage["log"]);
+            $("#log").html(output);
+        }
     </script>
 </head>
 
