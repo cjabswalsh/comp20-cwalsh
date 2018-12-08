@@ -1,0 +1,81 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+	<title>Assignment 4: Security Check</title>
+	<meta charset="utf-8" />
+	<link href="style.css" rel="stylesheet"/>
+</head>
+
+<body>
+	<h1>Comp 20 Assignment 4: Security</h1>
+	<p>By: Conner (Conrad) Walsh</p>
+	<h2>Introduction</h2>
+	<p>The product: a 2048 game server, used for storing the scores, usernames, final grids, and creation dates of 2048 scores.</p>
+	<p>I was hired to find security vulnerabilities in this server.</p>
+	<p>Note: I used my partner's (Harley White) database for the first issue found, and Ming Chow's code for all other issues.
+
+	<h2>Methodology</h2>
+	<p>I began by looking for the most basic security flaws (cross-site-scripting, code injection, etc).  I tried posting various kinds of data to the /submit path using curl, as well as adding various keys and operators to the /scores.json path in a web browser.  </p>
+
+	<h2>Abstract of Findings</h2>
+	<ol>
+		<li>Code injection: the database can be queried in unexpected ways to return other users' data.</li>
+		<li>cURL injection: unexpected entries can be entered into the database from malicious sources.</li>
+		<li>Cross-site-scripting (XSS): malicious code can be placed into values in the database which, when displayed by a browser, is then run.</li>
+	</ol>
+
+	<h2>Issues Found</h2>
+	<h3>Issue: NoSQL injection</h3>
+	<ul>
+		<li><span class=bold>Location: index.js, the /scores.json path</span></li>
+		<li><span class=bold>Severity: High.</span>
+			An attacker can easily see all the data in the database, including other user's data. If the database were holding any sensitive data, it could be seen by people it was not meant for.
+		</li>
+		<li><span class=bold>Description:</span> By inserting [$ne] into the query string, I was able to see all the scores that had a username <span class=bold>not equal</span> to my query string, meaning that I saw all other user data.</li>
+		<li><span class=bold>Proof:</span>
+			<div id="injection_img"><img src="injection.PNG" alt="An example of code injection"/></div>
+		</li>
+		<li><span class=bold>Resolution:</span> The easiest way to prevent this kind of attack would be to validate user data using a middleware like Joi in Celebrate. For example, you could validate the username using "username: Joi.string().optional()" (provided you include the right libraries of course).
+		</li>
+	</ul>
+
+	<h3>Issue: cURL injection</h3>
+	<ul>
+		<li><span class=bold>Location: server.js, the /scores.json path</span></li>
+		<li><span class=bold>Severity: Medium.</span>
+			An attacker can insert their own data into the database from any machine, which in this case means they can cheat and achieve a high score. However, this does not compromise other user's data without the use of other techniques.
+		</li>
+		<li><span class=bold>Description:</span> Using cURL, I was able to insert a fake username/score to the database. This is indicative of a much larger security problem, which is that there is no method of authentication to ensure the data comes from an actual game of 2048.</li>
+		<li><span class=bold>Proof:</span>
+			<div id="curl_img"><img src="curl.PNG" alt="An example of curl injection"/></div>
+		</li>
+		<li><span class=bold>Resolution:</span> There should be some method of validation, like only allowing post requests to /submit from trusted sources.
+			<p>Example: "res.header('Access-Control-Allow-Origin', 'example.com');" rather than "response.header("Access-Control-Allow-Origin", "*");" The first option allows only requests from 'example.com' rather than from all origins.</p></li>
+	</ul>
+
+	<h3>Issue: Cross-site-scripting (XSS)</h3>
+	<ul>
+		<li><span class=bold>Location: server.js, the homepage (GET /)</span></li>
+		<li><span class=bold>Severity: High.</span>
+			An attacker can insert their own script into the website's html, meaning it could do anything a website could do. In this case it only opened an alert, but it could be used to redirect the page, look at browser data, etc.
+		</li>
+		<li><span class=bold>Description:</span> I was able to place the text "&ltscript&gtalert('Hacked by Conner')&lt/script&gt" into a username, which was then interpreted as JavaScript by the browser.</li>
+		<li><span class=bold>Proof:</span>
+			<div id="xss_img"><img src="XSS.PNG" alt="An example of cross-site-scripting"/></div>
+		</li>
+		<li><span class=bold>Resolution:</span> The easiest way to deal with this would be to parse through each piece of data that was sent and remove any special characters, like &lt, &gt, etc. 
+			<p>Example: username = username.replace(/[^\w\s]/gi, '')", "");</p></li>
+	</ul>
+	<h2>Conclusion</h2>
+	<p>Though the security flaws listed here are basic, they are very dangerous indeed. NoSQL injection can expose sensitive user data, and curl injection can be used to place malicious code into a website through cross-site-scripting.  However, because they are so basic and well-known, they are fairly easy to protect against (at least somewhat). There are libraries that can be used to prevent injection (Celebrate with Joi) and curl injection (cors), and cross-site-scripting can be mostly prevented with a simple replace function.</p>
+	<h2>References</h2>
+	<p>Most of the information came from class notes and examples by Ming Chow. The online sources I used included:</p>
+	<ul>
+		<li>https://stackoverflow.com/questions/7067966/how-to-allow-cors</li>
+		<li>https://www.owasp.org/index.php/Testing_for_NoSQL_injection</li>
+		<li>https://blog.sqreen.io/prevent-nosql-injections-mongodb-node-js/</li>
+	</ul>
+</body>
+</html>
